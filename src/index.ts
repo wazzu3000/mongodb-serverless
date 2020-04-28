@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import app from './core/app';
-import modelRouter from './core/models-router';
+import { Router } from './core/router';
 import { Db } from './core/db';
 import { ConfigType, Config } from './core/config';
 
@@ -12,7 +12,9 @@ export function mongodbServerless(configValues: ConfigType): Promise<Express> {
     Config.instance.save(configValues);
     return new Promise<Express>((resolve, reject) => {
         Db.instance.connect().then(() => {
-            modelRouter(app);
+            const router = Router.instance;
+            router.modelRouter();
+            router.controllerRouter();
             app.listen(3000, () => resolve());
             resolve(app);
         }).catch(err => {
@@ -21,7 +23,10 @@ export function mongodbServerless(configValues: ConfigType): Promise<Express> {
     });
 };
 
+export { Request, Response } from 'express';
 export { Rules as ModelRules, Model } from './models/model';
+export { Controller } from './controllers/controller';
 export { Config } from './core/config';
 export { Session } from './core/session';
 export { model } from './decorators/model.decorator';
+export { controller, httpRequest } from './decorators/controller.decorator';

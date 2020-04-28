@@ -32,7 +32,6 @@ export class Session {
      */
     public decodeSession<T>(session: string): T {
         try {
-            debugger;
             return JSON.parse(jwt.verify(session, this.configSession.jwtSecret) as string);
         } catch (err) {
             return null;
