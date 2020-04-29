@@ -1,24 +1,64 @@
 export type ConfigType = {
+    /**
+     * Generic configurations to the app.
+     */
     app: {
+        /**
+         * Specify the path where are store the custom controllers.
+         */
         controllersPath: string,
+        /**
+         * Specify the path where are store the models.
+         */
         modelsPath: string,
+        /**
+         * Set the port number listen by the http request.
+         */
         port: number
     }
+    /**
+     * Configurations to the database.
+     */
     database: ConfigDatabase,
+    /**
+     * Session configuration
+     */
     session: ConfigSession,
     [key: string]: any
 };
 
 export type ConfigDatabase = {
+    /**
+     * Set the hostname or url to access to the database server.
+     */
     host: string,
+    /**
+     * User to login to the database.
+     */
     user?: string,
+    /**
+     * Password to login to the database.
+     */
     pass?: string,
+    /**
+     * Name of the database to use.
+     */
     name: string,
+    /**
+     * Port of the database to use, if you don't specify any it will use the
+     * default `27017` port.
+     */
     port?: string
 }
 
 export type ConfigSession = {
+    /**
+     * Time to live the session specify in seconds
+     */
     ttl: number,
+    /**
+     * Phrase to sign the JWT sessions
+     */
     jwtSecret: string
 }
 
