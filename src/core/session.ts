@@ -32,7 +32,13 @@ export class Session {
      */
     public decodeSession<T>(session: string): T {
         try {
-            return JSON.parse(jwt.verify(session, this.configSession.jwtSecret) as string);
+            const bearer = 'Bearer ';
+            if (session.indexOf(bearer) != 0) {
+                return null;
+            }
+
+            const token = session.replace(bearer, '');
+            return (jwt.verify(token, this.configSession.jwtSecret) as any).data;
         } catch (err) {
             return null;
         }

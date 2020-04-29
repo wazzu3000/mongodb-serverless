@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import * as mongoose from 'mongoose';
 import app from './../core/app';
-import { Rules, AccessModificators } from '../models/model';
-import { ModelController } from './../controllers/model-controller';
+import { Rules } from '../models/model';
+import { ModelController } from '../controllers/model.controller';
 import { Session } from './../core/session';
 import { Dictionary } from './../types';
 
@@ -30,16 +30,61 @@ export function model(name: string, rules?: Rules | undefined) {
         _rules.access.put = rules?.access?.put || 'public';
         _rules.access.delete = rules?.access?.delete || 'public';
 
-        // Register the router access just if the rule is not set as `disabled`
-        _rules.access.getOne != 'disabled' && app.get(`/api/${name}/:id`, (req, res) => handleRequest(req, res, handleGetOneRequest));
-        _rules.access.getMany != 'disabled' && app.get(`/api/${name}`, (req, res) => handleRequest(req, res, handleGetManyRequest));
-        _rules.access.post != 'disabled' && app.post(`/api/${name}`, (req, res) => handleRequest(req, res, handlePostRequest));
-        _rules.access.put != 'disabled' && app.put(`/api/${name}/:id`, (req, res) => handleRequest(req, res, handlePutRequest));
-        _rules.access.delete != 'disabled' && app.delete(`/api/${name}/:id`, (req, res) => handleRequest(req, res, handleDeleteRequest));
+        // Register the `getOne` document access rules
+        if (_rules.access.getOne != 'disabled') {
+            const url = `/api/${name}/:id`;
+            (typeof _rules.access.getOne === 'object' || _rules.access.getOne == 'private') && app.get(url, handleAuthRequest);
+            app.get(url, (req, res) => handleRequest(req, res, handleGetOneRequest));
+        }
+
+        // Register the `getMany` document access rules
+        if (_rules.access.getMany != 'disabled') {
+            const url = `/api/${name}`;
+            (typeof _rules.access.getMany === 'object' || _rules.access.getMany == 'private') && app.get(url, handleAuthRequest);
+            app.get(url, (req, res) => handleRequest(req, res, handleGetManyRequest));
+        }
+
+        // Register the `post` document access rules
+        if (_rules.access.post != 'disabled') {
+            const url = `/api/${name}`;
+            (typeof _rules.access.post === 'object' || _rules.access.post == 'private') && app.get(url, handleAuthRequest);
+            app.post(url, (req, res) => handleRequest(req, res, handlePostRequest));
+        }
+
+        // Register the `put` document access rules
+        if (_rules.access.put != 'disabled') {
+            const url = `/api/${name}/:id`;
+            (typeof _rules.access.put === 'object' || _rules.access.put == 'private') && app.get(url, handleAuthRequest);
+            app.put(url, (req, res) => handleRequest(req, res, handlePutRequest));
+        }
+
+        // Register the `delete` document access rules
+        if (_rules.access.delete != 'disabled') {
+            const url = `/api/${name}/:id`;
+            (typeof _rules.access.delete === 'object' || _rules.access.delete == 'private') && app.get(url, handleAuthRequest);
+            app.delete(url, (req, res) => handleRequest(req, res, handleDeleteRequest));
+        }
 
         rulesCollection[name] = _rules;
         constructor.prototype.schemaName = name;
     }
+}
+
+/**
+ * Handler for all authenticated requests.
+ * @param req The request sended by the client.
+ * @param res The response send to the client.
+ * @param next 
+ */
+function handleAuthRequest(req: Request, res: Response, next: () => void) {
+    var tokenDecoded = Session.instance.decodeSession<Dictionary<any>>(req.headers.authorization);
+    if (!tokenDecoded) {
+        res.status(401).end();
+        return;
+    }
+
+    req['tokenDecoded'] = tokenDecoded;
+    next();
 }
 
 /**
@@ -50,57 +95,26 @@ export function model(name: string, rules?: Rules | undefined) {
  */
 function handleRequest(req: Request, res: Response, fn: (Request, Response, controller: ModelController) => void) {
     const modelName = req.url.split('/')[2];
-    const modelController = new ModelController(modelsCollection, modelName);
+    const modelController = new ModelController(modelsCollection, rulesCollection, req['tokenDecoded'], modelName);
     fn(req, res, modelController);
 }
 
 function handleGetOneRequest(req: Request, res: Response, controller: ModelController) {
-    if (!validateAccess(rulesCollection[controller.modelName].access.getOne, req.headers.authorization)) {
-        res.status(401).end();
-        return;
-    }
     controller.get(req, res, req.params.id);
 }
 
 function handleGetManyRequest(req: Request, res: Response, controller: ModelController) {
-    if (!validateAccess(rulesCollection[controller.modelName].access.getMany, req.headers.authorization)) {
-        res.status(401).end();
-        return;
-    }
     controller.get(req, res);
 }
 
 function handlePostRequest(req: Request, res: Response, controller: ModelController) {
-    if (!validateAccess(rulesCollection[controller.modelName].access.post, req.headers.authorization)) {
-        res.status(401).end();
-        return;
-    }
     controller.post(req, res);
 }
 
 function handlePutRequest(req: Request, res: Response, controller: ModelController) {
-    if (!validateAccess(rulesCollection[controller.modelName].access.put, req.headers.authorization)) {
-        res.status(401).end();
-        return;
-    }
     controller.put(req, res, req.params.id);
 }
 
 function handleDeleteRequest(req: Request, res: Response, controller: ModelController) {
-    if (!validateAccess(rulesCollection[controller.modelName].access.delete, req.headers.authorization)) {
-        res.status(401).end();
-        return;
-    }
     controller.delete(req, res, req.params.id);
-}
-
-function validateAccess(accessType: AccessModificators, authorization: string): boolean {
-    const tokenDecoded = Session.instance.decodeSession<Dictionary<any>>(authorization);
-    if (accessType == 'public') {
-        return true;
-    } else if ((typeof accessType == 'object' || accessType == 'private') && !tokenDecoded) {
-        return false
-    }
-    
-    return true;
 }

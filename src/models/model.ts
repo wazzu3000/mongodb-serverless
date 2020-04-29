@@ -1,10 +1,5 @@
 import * as mongoose from 'mongoose';
 
-type SchemaRule = {
-    schema: mongoose.Schema,
-    rules: Rules
-}
-
 /**
  * Add suport to filter documents according the session values
  */
