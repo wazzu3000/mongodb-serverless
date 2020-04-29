@@ -135,3 +135,8 @@ export default class ExampleController extends Controller {
 
 > The correct way to execute the example method is make a `GET` request to the
 >  `/api/ExampleController/foo` url.
+
+## TODO
+
+* Finish write the documentation.
+* Make test
