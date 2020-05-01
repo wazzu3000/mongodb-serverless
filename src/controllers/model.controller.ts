@@ -46,10 +46,10 @@ export class ModelController extends Controller {
                 .then(_res => _res ? res.json(_res) : res.status(404).end())
                 .catch(err => res.status(500).end(err.message || err));
         } else {
-            const filter = Object.assign({}, req.query);
+            const filter = JSON.parse(JSON.stringify(req.query));
             const getMany = this.rules.access.getMany;
-            const page = parseInt(req.query._page || '1')
-            const pageSize = parseInt(req.query._page_size || defaultPageSize)
+            const page = parseInt((typeof req.query._page === 'string' && req.query._page) || '1')
+            const pageSize = parseInt((typeof req.query._page_size === 'string' && req.query._page_size) || defaultPageSize)
             delete filter._page;
             delete filter._page_size;
             delete filter._order_by;
