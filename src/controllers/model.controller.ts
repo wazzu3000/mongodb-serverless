@@ -4,6 +4,8 @@ import { Controller } from './controller';
 import { Dictionary } from './../types';
 import { Rules } from './../models/model';
 
+const defaultPageSize = '100';
+
 export class ModelController extends Controller {
     private readonly model: Model<any>;
     private readonly rules: Rules;
@@ -15,7 +17,9 @@ export class ModelController extends Controller {
     }
 
     /**
-     * Make a query from the specific collection
+     * Make a query from the specific collection, you can filter values with
+     * the querystring but the variables `_page`, `_page_size`, `_order_by`
+     * and `_order_by_desc` are used to alter the query.
      * @param req The request sended by the client
      * @param res The response send to the client
      */
@@ -44,6 +48,12 @@ export class ModelController extends Controller {
         } else {
             const filter = Object.assign({}, req.query);
             const getMany = this.rules.access.getMany;
+            const page = parseInt(req.query._page || '1')
+            const pageSize = parseInt(req.query._page_size || defaultPageSize)
+            delete filter._page;
+            delete filter._page_size;
+            delete filter._order_by;
+            delete filter._order_by_desc;
             if (typeof getMany === 'object') {
                 filter[getMany.filter.documentField] = this.user[getMany.filter.variableSession];
             }
@@ -52,6 +62,8 @@ export class ModelController extends Controller {
             }
 
             this.model.find(filter)
+                .skip(pageSize * (page - 1))
+                .limit(pageSize)
                 .then(_res => res.json(_res))
                 .catch(err => res.status(500).end(err.message || err))
         }

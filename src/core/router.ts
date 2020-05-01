@@ -17,7 +17,11 @@ export class Router {
 
     public modelRouter() {
         const modelsPath = Config.instance.values.app.modelsPath;
-    
+        if (!fs.existsSync(modelsPath)) {
+            console.warn(`The path "${modelsPath}" doesn't exists`)
+            return;
+        }
+
         for (let file of fs.readdirSync(modelsPath)) {
             if (path.extname(file) != '.js') {
                 continue;
@@ -27,12 +31,16 @@ export class Router {
             let model = new ModelClass() as Model;
             
             let schemaName = ModelClass.prototype.schemaName;
-            modelsCollection[schemaName] = Db.instance.conn.model(schemaName, model.schema);
+            modelsCollection[schemaName] = Db.instance.conn.model(schemaName, model.schema, schemaName);
         }
     }
 
     public controllerRouter() {
         const controllersPath = Config.instance.values.app.controllersPath;
+        if (!fs.existsSync(controllersPath)) {
+            console.warn(`The path "${controllersPath}" doesn't exists`)
+            return;
+        }
 
         for (let file of fs.readdirSync(controllersPath)) {
             if (path.extname(file) != '.js') {

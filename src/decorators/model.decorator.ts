@@ -94,7 +94,7 @@ function handleAuthRequest(req: Request, res: Response, next: () => void) {
  * @param fn Middleware that handle an specific request
  */
 function handleRequest(req: Request, res: Response, fn: (Request, Response, controller: ModelController) => void) {
-    const modelName = req.url.split('/')[2];
+    const modelName = req.path.split('/')[2];
     const modelController = new ModelController(modelsCollection, rulesCollection, req['tokenDecoded'], modelName);
     fn(req, res, modelController);
 }

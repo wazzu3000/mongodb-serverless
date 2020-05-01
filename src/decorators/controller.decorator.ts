@@ -74,7 +74,7 @@ function handleAuthRequest(req: Request, res: Response, next: () => void) {
  * @param res The response send to the client
  */
 function handleRequest(req: Request, res: Response) {
-    const urlSplit = req.url.split('/')
+    const urlSplit = req.path.split('/')
     const controllerName = urlSplit[2];
     const methodName = urlSplit[3];
     const ControllerClass = controllersCollection[controllerName] as any;
