@@ -15,7 +15,7 @@ export class Router {
 
     private constructor() { }
 
-    public modelRouter() {
+    public async modelRouter() {
         const modelsPath = Config.instance.values.app.modelsPath;
         if (!fs.existsSync(modelsPath)) {
             console.warn(`The path "${modelsPath}" doesn't exists`)
@@ -31,7 +31,9 @@ export class Router {
             let model = new ModelClass() as Model;
             
             let schemaName = ModelClass.prototype.schemaName;
-            modelsCollection[schemaName] = Db.instance.conn.model(schemaName, model.schema, schemaName);
+            let MongooseModel = Db.instance.conn.model(schemaName, model.schema, schemaName);
+            await MongooseModel.init();
+            modelsCollection[schemaName] = MongooseModel;
         }
     }
 

@@ -11,9 +11,9 @@ import { ConfigType, Config } from './core/config';
 export function mongodbServerless(configValues: ConfigType): Promise<Express> {
     Config.instance.save(configValues);
     return new Promise<Express>((resolve, reject) => {
-        Db.instance.connect().then(() => {
+        Db.instance.connect().then(async () => {
             const router = Router.instance;
-            router.modelRouter();
+            await router.modelRouter();
             router.controllerRouter();
             app.listen(3000, () => resolve());
             resolve(app);
