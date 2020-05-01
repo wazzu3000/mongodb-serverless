@@ -28,5 +28,6 @@ export { Rules as ModelRules, Model } from './models/model';
 export { Controller } from './controllers/controller';
 export { Config } from './core/config';
 export { Session } from './core/session';
+export { Db } from './core/db';
 export { model } from './decorators/model.decorator';
 export { controller, httpRequest } from './decorators/controller.decorator';

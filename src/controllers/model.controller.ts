@@ -85,10 +85,7 @@ export class ModelController extends Controller {
         }
         this.model.create(payload)
             .then(_res => res.status(201).json(_res._id))
-            .catch(err => {
-                res.status(500).write(err);
-                res.end();
-            });
+            .catch(err => err => res.status(500).end(err.message || err));
     }
 
     /**
@@ -114,10 +111,7 @@ export class ModelController extends Controller {
             filter,
             { $set: payload }
         ).then(() => res.status(204).end())
-        .catch(err => {
-            res.status(500).write(err);
-            res.end();
-        });
+        .catch(err => res.status(500).end(err.message || err));
     }
 
     /**
@@ -137,9 +131,6 @@ export class ModelController extends Controller {
         }
         this.model.deleteOne(filter)
             .then(() => res.json(_id))
-            .catch(err => {
-                res.status(500).write(err);
-                res.end();
-            });
+            .catch(err => err => res.status(500).end(err.message || err));
     }
 }
