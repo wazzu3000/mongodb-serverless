@@ -23,7 +23,10 @@ export class Db {
         const connectionOptions = { ...config.connectionOptions };
         connectionOptions.useNewUrlParser = true;
         connectionOptions.useUnifiedTopology = true;
-        return mongoose.connect(`mongodb://${config.host}:${(config.port || '27017')}/${config.name}`, connectionOptions).then(conn => {
+        return mongoose.connect(
+            `mongodb://${config.host}:${(config.port || '27017')}/${config.name}?retryWrites=true`,
+            connectionOptions
+        ).then(conn => {
             this._conn = conn;
         })
     }
