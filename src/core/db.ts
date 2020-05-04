@@ -20,12 +20,10 @@ export class Db {
 
     public connect(): Promise<void> {
         const config = this.config.values.database;
-        return mongoose.connect(`mongodb://${config.host}:${(config.port || '27017')}/${config.name}`, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            user: config.user || '',
-            pass: config.pass || ''
-        }).then(conn => {
+        const connectionOptions = { ...config.connectionOptions };
+        connectionOptions.useNewUrlParser = true;
+        connectionOptions.useUnifiedTopology = true;
+        return mongoose.connect(`mongodb://${config.host}:${(config.port || '27017')}/${config.name}`, connectionOptions).then(conn => {
             this._conn = conn;
         })
     }
