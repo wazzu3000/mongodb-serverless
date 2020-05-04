@@ -42,7 +42,11 @@ export type ConfigDatabase = {
      * Port of the database to use, if you don't specify any it will use the
      * default `27017` port.
      */
-    port?: string
+    port?: number
+    /**
+     * 
+     */
+    retryWrites?: boolean
     /**
      * Connection optional settings
      */

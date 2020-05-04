@@ -21,10 +21,14 @@ export class Db {
     public connect(): Promise<void> {
         const config = this.config.values.database;
         const connectionOptions = { ...config.connectionOptions };
+        if (config.retryWrites === undefined) {
+            config.retryWrites = true;
+        }
+
         connectionOptions.useNewUrlParser = true;
         connectionOptions.useUnifiedTopology = true;
         return mongoose.connect(
-            `mongodb://${config.host}:${(config.port || '27017')}/${config.name}?retryWrites=true`,
+            `mongodb://${config.host}:${(config.port || '27017')}/${config.name}?retryWrites=${config.retryWrites}`,
             connectionOptions
         ).then(conn => {
             this._conn = conn;
