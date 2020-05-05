@@ -1,5 +1,3 @@
-import { ConnectionOptions } from 'mongoose';
-
 export type ConfigType = {
     /**
      * Generic configurations to the app.
@@ -37,20 +35,20 @@ export type ConfigDatabase = {
     /**
      * User to login to the database.
      */
+    user?: string,
+    /**
+     * Password to login to the database.
+     */
+    pass?: string,
+    /**
+     * Name of the database to use.
+     */
     name: string,
     /**
      * Port of the database to use, if you don't specify any it will use the
      * default `27017` port.
      */
     port?: number
-    /**
-     * 
-     */
-    retryWrites?: boolean
-    /**
-     * Connection optional settings
-     */
-    connectionOptions: ConnectionOptions
 }
 
 export type ConfigSession = {

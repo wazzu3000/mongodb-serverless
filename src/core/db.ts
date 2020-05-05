@@ -20,16 +20,16 @@ export class Db {
 
     public connect(): Promise<void> {
         const config = this.config.values.database;
-        const connectionOptions = { ...config.connectionOptions };
-        if (config.retryWrites === undefined) {
-            config.retryWrites = true;
-        }
+        const protocol = config.host.match(/^.+:\/\//)[0] ? '' : 'mongodb://';
 
-        connectionOptions.useNewUrlParser = true;
-        connectionOptions.useUnifiedTopology = true;
         return mongoose.connect(
-            `mongodb://${config.host}:${(config.port || '27017')}/${config.name}?retryWrites=${config.retryWrites}`,
-            connectionOptions
+            `${protocol}${config.host}${(config.port ? `:${config.port}` : '')}/${config.name}`,
+            {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                user: config.user || '',
+                pass: config.pass || ''
+            }
         ).then(conn => {
             this._conn = conn;
         })
