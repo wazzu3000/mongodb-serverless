@@ -20,7 +20,7 @@ export class Db {
 
     public connect(): Promise<void> {
         const config = this.config.values.database;
-        const protocol = config.host.match(/^.+:\/\//)[0] ? '' : 'mongodb://';
+        const protocol = config.host.match(/^.+:\/\//) ? '' : 'mongodb://';
 
         return mongoose.connect(
             `${protocol}${config.host}${(config.port ? `:${config.port}` : '')}/${config.name}`,
