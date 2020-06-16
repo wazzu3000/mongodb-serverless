@@ -15,7 +15,7 @@ export function mongodbServerless(configValues: ConfigType): Promise<Express> {
             const router = Router.instance;
             await router.modelRouter();
             router.controllerRouter();
-            app.listen(3000, () => resolve());
+            app.listen(configValues.app.port || 3000, () => resolve());
             resolve(app);
         }).catch(err => {
             reject(err);
