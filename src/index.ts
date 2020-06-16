@@ -10,16 +10,16 @@ import { ConfigType, Config } from './core/config';
  */
 export function mongodbServerless(configValues: ConfigType): Promise<Express> {
     Config.instance.save(configValues);
-    return new Promise<Express>((resolve, reject) => {
-        Db.instance.connect().then(async () => {
+    return new Promise<Express>(async (resolve, reject) => {
+        try {
+            await Db.instance.connect()
             const router = Router.instance;
             await router.modelRouter();
             router.controllerRouter();
-            app.listen(configValues.app.port || 3000, () => resolve());
             resolve(app);
-        }).catch(err => {
+        } catch (err) {
             reject(err);
-        });
+        }
     });
 };
 
