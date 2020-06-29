@@ -10,19 +10,19 @@ import { ConfigType, Config } from './core/config';
  * @param subApp Add extra configuration to express
  */
 export function mongodbServerless(configValues: ConfigType, subApp: Express = null): Promise<Express> {
-    Config.instance.save(configValues);
-    return new Promise<Express>(async (resolve, reject) => {
-        try {
-            await Db.instance.connect();
-            subApp && app.use(subApp);
-            const router = Router.instance;
-            await router.modelRouter();
-            router.controllerRouter();
-            resolve(app);
-        } catch (err) {
-            reject(err);
-        }
-    });
+  Config.instance.save(configValues);
+  return new Promise<Express>(async (resolve, reject) => {
+    try {
+      await Db.instance.connect();
+      subApp && app.use(subApp);
+      const router = Router.instance;
+      await router.modelRouter();
+      router.controllerRouter();
+      resolve(app);
+    } catch (err) {
+      reject(err);
+    }
+  });
 };
 
 export { Request, Response } from 'express';
