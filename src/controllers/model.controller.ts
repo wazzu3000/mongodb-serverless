@@ -65,12 +65,12 @@ export class ModelController extends Controller {
       if (this.rules.logicalDelete) {
         filter.delete = false;
       }
-      if (query && this.rules.searchableFields && this.rules.searchableFields.length > 0) {
+      if (query && typeof query === 'string' && this.rules.searchableFields && this.rules.searchableFields.length > 0) {
         const or = []
-        query = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        let querySimplified = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
         
         for (let field of this.rules.searchableFields) {
-          or.push({ [field]: new RegExp(query, 'i') })
+          or.push({ [field]: new RegExp(querySimplified, 'i') })
         }
         filter.$or = or;
       }
