@@ -18,8 +18,8 @@ export class ModelController extends Controller {
 
   /**
    * Make a query from the specific collection, you can filter values with
-   * the querystring but the variables `_page`, `_page_size`, `_order_by`
-   * and `_order_by_desc` are used to alter the query.
+   * the querystring but the variables `_page`, `_page_size`, `_order_by`,
+   * `_order_by_desc` and `_query` are used to alter the query.
    * @param req The request sended by the client
    * @param res The response send to the client
    */
@@ -49,6 +49,7 @@ export class ModelController extends Controller {
         res.status(500).end(err.message || err);
       }
     } else {
+      let query: string = req.query._query;
       const filter = JSON.parse(JSON.stringify(req.query));
       const getMany = this.rules.access.getMany;
       const page = parseInt((typeof req.query._page === 'string' && req.query._page) || '1')
@@ -57,11 +58,21 @@ export class ModelController extends Controller {
       delete filter._page_size;
       delete filter._order_by;
       delete filter._order_by_desc;
+      delete filter._query;
       if (typeof getMany === 'object') {
         filter[getMany.filter.documentField] = this.user[getMany.filter.variableSession];
       }
       if (this.rules.logicalDelete) {
         filter.delete = false;
+      }
+      if (query && this.rules.searchableFields && this.rules.searchableFields.length > 0) {
+        const or = []
+        query = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        
+        for (let field of this.rules.searchableFields) {
+          or.push({ [field]: new RegExp(query, 'i') })
+        }
+        filter.$or = or;
       }
 
       try {

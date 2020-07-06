@@ -92,7 +92,11 @@ export type Rules = {
      * default is false
      */
     logicalDelete?: boolean,
-    searchable?: boolean
+    /**
+     * Set the fields to search with the `_query` attribute from the query
+     * string
+     */
+    searchableFields?: [string]
 }
 
 export abstract class Model {
