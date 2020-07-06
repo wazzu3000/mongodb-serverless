@@ -49,7 +49,7 @@ export class ModelController extends Controller {
         res.status(500).end(err.message || err);
       }
     } else {
-      let query: string = req.query._query;
+      let query = req.query._query;
       const filter = JSON.parse(JSON.stringify(req.query));
       const getMany = this.rules.access.getMany;
       const page = parseInt((typeof req.query._page === 'string' && req.query._page) || '1')
