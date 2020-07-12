@@ -92,7 +92,7 @@ export class ModelController extends Controller {
    * @param req The request sended by the client
    * @param res The response send to the client
    */
-  public post(req: express.Request, res: express.Response) {
+  public async post(req: express.Request, res: express.Response) {
     const payload = { ...req.body };
     const post = this.rules.access.post;
     if (typeof post === 'object') {
@@ -101,9 +101,16 @@ export class ModelController extends Controller {
     if (this.rules.logicalDelete) {
       payload.delete = false;
     }
-    this.model.create(payload)
-      .then(_res => res.status(201).json(_res._id))
-      .catch(err => err => res.status(500).end(err.message || err));
+    try {
+      const _res = await this.model.create(payload);
+      res.status(201).json(_res._id);
+    } catch(err) {
+      if (err.name === 'ValidationError') {
+        res.status(400).end(err.message)
+      } else {
+        res.status(500).end(err.message || err);
+      }
+    }
   }
 
   /**
@@ -112,7 +119,7 @@ export class ModelController extends Controller {
    * @param res The response send to the client
    * @param _id Id of the document
    */
-  public put(req: express.Request, res: express.Response, _id: any) {
+  public async put(req: express.Request, res: express.Response, _id: any) {
     const filter: Dictionary<any> = { _id };
     const payload = { ...req.body };
     const put = this.rules.access.put;
@@ -125,11 +132,15 @@ export class ModelController extends Controller {
       payload.delete = false;
     }
 
-    this.model.update(
-      filter,
-      { $set: payload }
-    ).then(() => res.status(204).end())
-    .catch(err => res.status(500).end(err.message || err));
+    try {
+      await this.model.update(filter, { $set: payload });
+    } catch(err) {
+      if (err.name === 'ValidationError') {
+        res.status(400).end(err.message)
+      } else {
+        res.status(500).end(err.message || err);
+      }
+    }
   }
 
   /**
@@ -138,7 +149,7 @@ export class ModelController extends Controller {
    * @param res The response send to the client
    * @param _id Id of the document
    */
-  public delete(req: express.Request, res: express.Response, _id: any) {
+  public async delete(req: express.Request, res: express.Response, _id: any) {
     const filter: Dictionary<any> = { _id };
     const _delete = this.rules.access.delete;
     if (typeof _delete === 'object') {
@@ -147,8 +158,11 @@ export class ModelController extends Controller {
     if (this.rules.logicalDelete) {
       filter.delete = false;
     }
-    this.model.deleteOne(filter)
-      .then(() => res.json(_id))
-      .catch(err => err => res.status(500).end(err.message || err));
+
+    try {
+      await this.model.deleteOne(filter);
+    } catch(err) {
+      res.status(500).end(err.message || err);
+    }
   }
 }
